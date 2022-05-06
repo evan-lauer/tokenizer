@@ -48,6 +48,28 @@ Value *numToken(char charRead) {
     return newToken;
 
 }
+
+// boolean
+Value *boolToken(char readChar) {
+  Value *newboolToken = talloc(sizeof(Value));
+  newboolToken->type = BOOL_TYPE;
+  int *boolToken = talloc(sizeof(int) * 2);
+  
+  if (readChar == 'f') {
+    boolToken [0] = 0;
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else if (readChar == 't') {
+    boolToken [0] = 1;
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else {
+    printf("Syntax error: untokenizeable \n");
+    texit(0);
+  }
+  return newboolToken;
+}
+
 Value *parenthesisToken(char paren)
 {
     Value* token = (Value*)talloc(sizeof(Value));
@@ -57,6 +79,39 @@ Value *parenthesisToken(char paren)
     string[1] = '\0';
     token->s = string;
     return token;
+}
+
+// boolean
+Value *boolToken(char readChar) {
+  Value *newboolToken = talloc(sizeof(Value));
+  newboolToken->type = BOOL_TYPE;
+  int *boolToken = talloc(sizeof(int) * 2);
+  
+  if (readChar == 'f') {
+    boolToken [0] = '#f';
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else if (readChar == 't') {
+    boolToken [0] = '#t';
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else {
+    printf("Syntax error: untokenizeable \n");
+    texit(0);
+  }
+  return newboolToken;
+}
+
+// looks for comment if readChar is ';'
+int isComment(char readChar) {
+    while (readChar != EOF && readChar != '/n') {
+        readChar = (char)fgetc(stdin); //keep searching for end of comment
+    }
+    if (readChar == EOF) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 // Read all of the input from stdin, and return a linked list consisting of the
@@ -71,31 +126,19 @@ Value *tokenize() {
         Value* newConsNode = cons(charRead, list); // the cdr of this should be the head of the current list
                                                    // (we will create a reverse list first, then reverse it)
 
-        
-
-        if (charRead == '(') {
-            Value* token = parenthesisToken('(');
-        } else if (charRead == ')') {
-            Value* token = parenthesisToken(')');
+        if (charRead == '(' || charRead == ')') {
+            list = cons(parenthesisToken(charRead), list);
         } else if (charRead == '#') {
-            ...
+            list = cons(boolToken(charRead), list);
+        } else if (charRead == '+' || charRead == '-'){
+            list = cons(numToken(charRead), list);
         } else if (charRead == '"') {
-            ...
+            list = cons(readString(), list);
         } else if (charRead == ';') {
-            if(isComment(charRead)){
-            }
+            isComment(charRead)
         else {
             ...
         }
-        // else if (charRead == '#') {
-        //     ...
-        // } else if (charRead == '"') {
-        //     ...
-        // } else if (charRead == ';') {
-        //     ...
-        // else {
-        //     ...
-        // }
         
         charRead = (char)fgetc(stdin);
     }
@@ -181,6 +224,8 @@ char *readString()
     texit(1);
 }
 
+
+
 // Displays the contents of the linked list as tokens, with type information
 void displayTokens(Value *list){
     //token = car(list);
@@ -189,7 +234,12 @@ void displayTokens(Value *list){
             printf("%i : integer \n", car(list));
         }
         if (car(list)->type == BOOL_TYPE){
-            printf("%b : boolean \n", car(list));
+            if (boolToken){
+                printf("#t: boolean \n", car(list));
+            }
+            else{
+                printf("#f: boolean \n", car(list));
+            }
         }
         if (car(list)->type == STR_TYPE){
             printf("%s : string \n", car(list));
