@@ -250,16 +250,7 @@ void displayTokens(Value *list){
             printf("%i : integer \n", car(list));
         }
         if (car(list)->type == BOOL_TYPE){
-<<<<<<< HEAD
-            if (boolToken){
-                printf("#t: boolean \n", car(list));
-            }
-            else{
-                printf("#f: boolean \n", car(list));
-            }
-=======
             printf("%d : boolean \n", car(list));
->>>>>>> 361583ea19b048c54a876cdfe3c425163b35d052
         }
         if (car(list)->type == STR_TYPE){
             printf("%s : string \n", car(list));
