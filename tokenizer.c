@@ -82,7 +82,8 @@ Value *tokenize() {
         } else if (charRead == '"') {
             ...
         } else if (charRead == ';') {
-            ...
+            if(isComment(charRead)){
+            }
         else {
             ...
         }
@@ -125,8 +126,29 @@ char *readString()
 // Displays the contents of the linked list as tokens, with type information
 void displayTokens(Value *list){
     //token = car(list);
-    printf("%c : %s \n", car(list), car(list)->type);
-    if (cdr(list)->type != NULL_TYPE){
+    while(cdr(list)->type != NULL_TYPE){
+        if (car(list)->type == INT_TYPE){
+            printf("%i : integer \n", car(list));
+        }
+        if (car(list)->type == BOOL_TYPE){
+            printf("%b : boolean \n", car(list));
+        }
+        if (car(list)->type == STR_TYPE){
+            printf("%s : string \n", car(list));
+        }
+        if (car(list)->type == DOUBLE_TYPE){
+            printf("%d : double \n", car(list));
+        }
+        if (car(list)->type == SYMBOL_TYPE){
+            printf("%% : symbol \n", car(list));
+        }
+        if (car(list)->type == OPEN_TYPE){
+            printf("( : open \n", car(list));
+        }
+        if (car(list)->type == CLOSE_TYPE){
+            printf(") : close \n", car(list));
+        }
         displayTokens(cdr(list));
     }
+    texit(0);
 }

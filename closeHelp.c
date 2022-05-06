@@ -60,3 +60,15 @@ Value *boolToken(char readChar) {
   }
   return newboolToken;
 }
+
+// looks for comment if readChar is ';'
+int isComment(char readChar) {
+    while (readChar != EOF && readChar != '/n') {
+        readChar = (char)fgetc(stdin); //keep searching for end of comment
+    }
+    if (readChar == EOF) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
