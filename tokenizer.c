@@ -14,14 +14,31 @@ Value *tokenize() {
     charRead = (char)fgetc(stdin);
 
     while (charRead != EOF) {
-        if (charRead == .....) {
-            //create new constype node
-            newNode = cons(charRead, Value *newCdr) //confused what the newcdr is meant to be
-            newNode->type = int;
-        } else if (charRead == ......) { //do we need an else if for every type?
-            ...
-        } else {
-            makeNull();
+        //create new constype node
+        Value* newNode = cons(charRead, list); //confused what the newcdr is meant to be
+        switch (charRead) {
+            case ' ' :
+                // case for when the char is a space
+                break;
+            case '(' :
+                // case for open paren
+                break;
+            case ')' :
+                // case for closed paren
+                break;
+            case '"' :
+                // case for open quote (maybe call a helper function?
+                // and the helper function will read until the end of the string
+                // then return, and then we move on to the next token)
+                break;
+            case ';' :
+                // case for a comment (when we find this we need to skip the rest of the line)
+                break;
+            
+            // Now we also need to figure out integers and doubles (signs, decimal points, etc)
+
+            default :
+                // this is our "else"
         }
         charRead = (char)fgetc(stdin);
     }
