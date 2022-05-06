@@ -46,6 +46,7 @@ Value *numToken(char charRead) {
     }
     ungetc(charRead, stdin);
     return newToken;
+
 Value *parenthesisToken(char paren)
 {
     Value* token = (Value*)talloc(sizeof(Value));
