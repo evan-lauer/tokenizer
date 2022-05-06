@@ -70,8 +70,7 @@ Value *boolToken(char readChar) {
   return newboolToken;
 }
 
-Value *parenthesisToken(char paren)
-{
+Value *parenthesisToken(char paren){
     Value* token = (Value*)talloc(sizeof(Value));
     token->type = STR_TYPE;
     char* string = (char*)talloc(sizeof(char) * 2);
@@ -137,17 +136,17 @@ Value *tokenize() {
         } else if (charRead == ';') {
             isComment(charRead)
         else {
-            ...
+            printf("Syntax error: untokenizable");
+        break;
         }
         
         charRead = (char)fgetc(stdin);
     }
     Value *revList = reverse(list);
     return revList;
-}
+}}
 
-bool isInitial(char ch)
-{
+bool isInitial(char ch){
     if (65 <= ch && ch <= 90 || 97 <= ch && ch <= 122)
     {
         return true;
