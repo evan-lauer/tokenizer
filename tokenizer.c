@@ -77,15 +77,16 @@ Value *tokenize() {
             Value* token = parenthesisToken('(');
         } else if (charRead == ')') {
             Value* token = parenthesisToken(')');
-        } else if (charRead == '#') {
-            ...
-        } else if (charRead == '"') {
-            ...
-        } else if (charRead == ';') {
-            ...
-        else {
-            ...
         }
+        // else if (charRead == '#') {
+        //     ...
+        // } else if (charRead == '"') {
+        //     ...
+        // } else if (charRead == ';') {
+        //     ...
+        // else {
+        //     ...
+        // }
         
         // switch (charRead) {
         //     case ' ' :
@@ -117,6 +118,55 @@ Value *tokenize() {
     }
     Value *revList = reverse(list);
     return revList;
+}
+
+bool isInitial(char ch)
+{
+    if (65 <= ch && ch <= 90 || 97 <= ch && ch <= 122)
+    {
+        return true;
+    }
+    if (ch == '!' || ch == '$' || ch == '%' || ch == '&' || ch == '*' || ch == '/' || ch == ':' || ch == '<'
+        || ch == '=' || ch == '>' || ch == '?' || ch == '~' || ch == '_' || ch == '^')
+    {
+        return true;
+    }
+    return false;
+}
+
+bool isSubsequent(char ch)
+{
+    if (isInitial(ch))
+    {
+        return true;
+    }
+    if (isdigit(ch))
+    {
+        return true;
+    }
+    if (ch == '.' || ch == '+' || ch == '-')
+    {
+        return true;
+    }
+    return false;
+}
+
+
+Value* symbolToken(char charRead)
+{
+    char* symbol = (char*)talloc(301);
+    int symSize = 0;
+
+    char initial = (char)fgetc(stdin);
+    if (isInitial(initial))
+    {
+        symbol[0] = initial;
+        symSize++;
+    } else
+    {
+        printf("Syntax error: Untokenizable input: %c\n", initial);
+        texit(1);
+    }
 }
 
 // This function should be called when an open quote is found. 
