@@ -42,10 +42,12 @@ Value *numToken(char charRead) {
         newToken->d = strtod(fullnumber, &endptr);
     } else {
         newToken->type = INT_TYPE;
-        newToken->numSize= strtod(fullnumber, &endptr);
+        newToken->i = strtod(fullnumber, &endptr);
     }
     ungetc(charRead, stdin);
     return newToken;
+
+}
 Value *parenthesisToken(char paren)
 {
     Value* token = (Value*)talloc(sizeof(Value));
