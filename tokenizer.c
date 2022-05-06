@@ -20,32 +20,47 @@ Value *tokenize() {
                                                    // (we will create a reverse list first, then reverse it)
 
         Value* newCarNode; // this will become the node which contains the actual token
-        switch (charRead) {
-            case ' ' :
-                // case for when the char is a space
 
-                break;
-            case '(' :
-                // case for open paren
-                break;
-            case ')' :
-                // case for closed paren
-                break;
-            case '"' :
-                // case for open quote (maybe call a helper function?
-                // and the helper function will read until the end of the string
-                // then return, and then we move on to the next token)
-                
-                break;
-            case ';' :
-                // case for a comment (when we find this we need to skip the rest of the line)
-                break;
-            
-            // Now we also need to figure out integers and doubles (signs, decimal points, etc)
-
-            default :
-                // this is our "else"
+        if (charRead == '(') {
+            ...
+        } else if (charRead == ')') {
+            ...
+        } else if (charRead == '#') {
+            ...
+        } else if (charRead == '"') {
+            ...
+        } else if (charRead == ';') {
+            ...
+        else {
+            ...
         }
+        
+        // switch (charRead) {
+        //     case ' ' :
+        //         // case for when the char is a space
+
+        //         break;
+        //     case '(' :
+        //         // case for open paren
+        //         break;
+        //     case ')' :
+        //         // case for closed paren
+        //         break;
+        //     case '"' :
+        //         // case for open quote (maybe call a helper function?
+        //         // and the helper function will read until the end of the string
+        //         // then return, and then we move on to the next token)
+                
+        //         break;
+        //     case ';' :
+        //         // case for a comment (when we find this we need to skip the rest of the line)
+        //         break;
+            
+        //     // Now we also need to figure out integers and doubles (signs, decimal points, etc)
+
+        //     default :
+        //         // this is our "else"
+        // }
         charRead = (char)fgetc(stdin);
     }
     Value *revList = reverse(list);
