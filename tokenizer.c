@@ -182,17 +182,34 @@ Value* symbolToken(char charRead)
 {
     char* symbol = (char*)talloc(301);
     int symSize = 0;
+    Value* symToken = (Value*)talloc(sizeof(Value));
+    symToken->type = SYMBOL_TYPE;
 
-    char initial = (char)fgetc(stdin);
-    if (isInitial(initial))
+    if (isInitial(charRead))
     {
-        symbol[0] = initial;
+        symbol[0] = charRead;
         symSize++;
+        charRead = (char)fgetc(stdin);
+        while (charRead != EOF && charRead != ' ' && charRead != '\n' && charRead != '(' && charRead != ')')
+        {
+            symbol[symSize] = charRead;
+            symSize++;
+            charRead = (char)fgetc(stdin);
+        }
+        ungetc(charRead, stdin);
+    } else
+    if (charRead == '+' || charRead == '-')
+    {
+        symbol[0] = charRead;
+        symSize++; // want to return
+        
     } else
     {
-        printf("Syntax error: Untokenizable input: %c\n", initial);
+        printf("Syntax error: Untokenizable input: %c\n", charRead);
         texit(1);
     }
+    symToken->s = symbol;
+    return symToken;
 }
 
 // This function should be called when an open quote is found. 
@@ -234,12 +251,16 @@ void displayTokens(Value *list){
             printf("%i : integer \n", car(list));
         }
         if (car(list)->type == BOOL_TYPE){
+<<<<<<< HEAD
             if (boolToken){
                 printf("#t: boolean \n", car(list));
             }
             else{
                 printf("#f: boolean \n", car(list));
             }
+=======
+            printf("%d : boolean \n", car(list));
+>>>>>>> 361583ea19b048c54a876cdfe3c425163b35d052
         }
         if (car(list)->type == STR_TYPE){
             printf("%s : string \n", car(list));
