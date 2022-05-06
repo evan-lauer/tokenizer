@@ -33,9 +33,9 @@ Value *tokenize() {
         
 
         if (charRead == '(') {
-            Value* token = 
+            Value* token = parenthesisToken('(');
         } else if (charRead == ')') {
-            ...
+            Value* token = parenthesisToken(')');
         } else if (charRead == '#') {
             ...
         } else if (charRead == '"') {
