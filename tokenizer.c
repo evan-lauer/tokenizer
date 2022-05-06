@@ -46,6 +46,15 @@ Value *numToken(char charRead) {
     }
     ungetc(charRead, stdin);
     return newToken;
+Value *parenthesisToken(char paren)
+{
+    Value* token = (Value*)talloc(sizeof(Value));
+    token->type = STR_TYPE;
+    char* string = (char*)talloc(sizeof(char) * 2);
+    string[0] = paren;
+    string[1] = '\0';
+    token->s = string;
+    return token;
 }
 
 // Read all of the input from stdin, and return a linked list consisting of the
@@ -60,12 +69,12 @@ Value *tokenize() {
         Value* newConsNode = cons(charRead, list); // the cdr of this should be the head of the current list
                                                    // (we will create a reverse list first, then reverse it)
 
-        Value* newCarNode; // this will become the node which contains the actual token
+        
 
         if (charRead == '(') {
-            ...
+            Value* token = parenthesisToken('(');
         } else if (charRead == ')') {
-            ...
+            Value* token = parenthesisToken(')');
         } else if (charRead == '#') {
             ...
         } else if (charRead == '"') {
