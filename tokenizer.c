@@ -7,6 +7,36 @@
 #include <assert.h>
 #include <string.h>
 
+// This function should be called when an open quote is found. 
+// It will read characters from stdin until another quote is found.
+// If a \n or EOF is found before another quote, an error is thrown.
+//
+// BE CAREFUL WITH THIS! ONLY CALL WHEN " IS FOUND
+//
+// This method will consume stdin characters up to *and including* the closing quote
+char *readString()
+{
+    char charRead = (char)fgetc(stdin); // this should be the first character of the string
+
+    char* newString = "\"";
+    
+    while (charRead != EOF && charRead != '\n')
+    {
+        if (charRead == '"')
+        {
+            return strcat(newString, (char)('"'));
+        } else
+        {
+            // add charRead to newString
+            newString = strcat(newString, charRead);
+        }
+        charRead = (char)fgetc(stdin);
+    } // if we reach the end of the this while loop before we return, it means we have an error.
+    printf("Syntax error: Closing quotation (\") expected.\n");
+    texit(1);
+}
+
+
 //tokenizing numbers
 Value *numToken(char charRead) {
     char *fullnumber = talloc(301); //input cannot be longer than 300 chars
@@ -80,26 +110,6 @@ Value *parenthesisToken(char paren){
     return token;
 }
 
-// boolean
-Value *boolToken(char readChar) {
-  Value *newboolToken = talloc(sizeof(Value));
-  newboolToken->type = BOOL_TYPE;
-  int *boolToken = talloc(sizeof(int) * 2);
-  
-  if (readChar == 'f') {
-    boolToken [0] = '#f';
-    boolToken [1] = '\0';
-    newboolToken->i = *boolToken;
-  } else if (readChar == 't') {
-    boolToken [0] = '#t';
-    boolToken [1] = '\0';
-    newboolToken->i = *boolToken;
-  } else {
-    printf("Syntax error: untokenizeable \n");
-    texit(0);
-  }
-  return newboolToken;
-}
 
 // looks for comment if readChar is ';'
 int isComment(char readChar) {
@@ -122,7 +132,7 @@ Value *tokenize() {
 
     while (charRead != EOF) {
         //create new constype node
-        Value* newConsNode = cons(charRead, list); // the cdr of this should be the head of the current list
+        //Value* newConsNode = cons(charRead, list); // the cdr of this should be the head of the current list
                                                    // (we will create a reverse list first, then reverse it)
 
         if (charRead == '(' || charRead == ')') {
@@ -134,7 +144,7 @@ Value *tokenize() {
         } else if (charRead == '"') {
             list = cons(readString(), list);
         } else if (charRead == ';') {
-            isComment(charRead)
+            isComment(charRead);
         else {
             printf("Syntax error: untokenizable");
         break;
@@ -211,34 +221,6 @@ Value* symbolToken(char charRead)
     return symToken;
 }
 
-// This function should be called when an open quote is found. 
-// It will read characters from stdin until another quote is found.
-// If a \n or EOF is found before another quote, an error is thrown.
-//
-// BE CAREFUL WITH THIS! ONLY CALL WHEN " IS FOUND
-//
-// This method will consume stdin characters up to *and including* the closing quote
-char *readString()
-{
-    char charRead = (char)fgetc(stdin); // this should be the first character of the string
-
-    char* newString = "\"";
-    
-    while (charRead != EOF && charRead != '\n')
-    {
-        if (charRead == '"')
-        {
-            return strcat(newString, (char)('"'));
-        } else
-        {
-            // add charRead to newString
-            newString = strcat(newString, charRead);
-        }
-        charRead = (char)fgetc(stdin);
-    } // if we reach the end of the this while loop before we return, it means we have an error.
-    printf("Syntax error: Closing quotation (\") expected.\n");
-    texit(1);
-}
 
 
 
@@ -250,16 +232,12 @@ void displayTokens(Value *list){
             printf("%i : integer \n", car(list));
         }
         if (car(list)->type == BOOL_TYPE){
-<<<<<<< HEAD
-            if (boolToken){
-                printf("#t: boolean \n", car(list));
+            if (boolToken(car(list))){
+                printf("#t: boolean \n");
             }
             else{
-                printf("#f: boolean \n", car(list));
+                printf("#f: boolean \n");
             }
-=======
-            printf("%d : boolean \n", car(list));
->>>>>>> 361583ea19b048c54a876cdfe3c425163b35d052
         }
         if (car(list)->type == STR_TYPE){
             printf("%s : string \n", car(list));
@@ -271,10 +249,10 @@ void displayTokens(Value *list){
             printf("%% : symbol \n", car(list));
         }
         if (car(list)->type == OPEN_TYPE){
-            printf("( : open \n", car(list));
+            printf("( : open \n");
         }
         if (car(list)->type == CLOSE_TYPE){
-            printf(") : close \n", car(list));
+            printf(") : close \n");
         }
         displayTokens(cdr(list));
     }
