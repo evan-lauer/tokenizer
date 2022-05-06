@@ -1,5 +1,5 @@
-//tokenizing numbers
-Value *numToken(char charRead) {
+//boolTokenizing numbers
+Value *numboolToken(char charRead) {
     char *fullnumber = talloc(301); //input cannot be longer than 300 chars
     int doubleCheck = 0;
     int numSize = 0;
@@ -27,14 +27,36 @@ Value *numToken(char charRead) {
 
     fullnumber[numSize] = '\0'; //end of num
     char *endptr;
-    Value *newToken = talloc(sizeof(Value));
+    Value *newboolToken = talloc(sizeof(Value));
     if (doubleCheck) {
-        newToken->type = DOUBLE_TYPE;
-        newToken->d = strtod(fullnumber, &endptr);
+        newboolToken->type = DOUBLE_TYPE;
+        newboolToken->d = strtod(fullnumber, &endptr);
     } else {
-        newToken->type = INT_TYPE;
-        newToken->numSize= strtod(fullnumber, &endptr);
+        newboolToken->type = INT_TYPE;
+        newboolToken->numSize= strtod(fullnumber, &endptr);
     }
     ungetc(charRead, stdin);
-    return newToken;
+    return newboolToken;
+}
+
+
+// boolean
+Value *boolToken(char readChar) {
+  Value *newboolToken = talloc(sizeof(Value));
+  newboolToken->type = BOOL_TYPE;
+  int *boolToken = talloc(sizeof(int) * 2);
+  
+  if (readChar == 'f') {
+    boolToken [0] = '#f';
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else if (readChar == 't') {
+    boolToken [0] = '#t';
+    boolToken [1] = '\0';
+    newboolToken->i = *boolToken;
+  } else {
+    printf("Syntax error: untokenizeable \n");
+    texit(0);
+  }
+  return newboolToken;
 }
