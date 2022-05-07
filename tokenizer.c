@@ -1,11 +1,64 @@
 #include "value.h"
-#include "linkedlist.c"
-#include "talloc.c"
+#include "linkedlist.h"
+#include "talloc.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
+
+
+bool isSymbol(char ch){
+    if (65 <= ch && ch <= 90 || 97 <= ch && ch <= 122)
+    {
+        return true;
+    }
+    if (ch == '!' || ch == '$' || ch == '%' || ch == '&' || ch == '*' || ch == '/' || ch == ':' || ch == '<'
+        || ch == '=' || ch == '>' || ch == '?' || ch == '~' || ch == '_' || ch == '^')
+    {
+        return true;
+    }
+    return false;
+}
+
+bool isSubsequent(char ch)
+{
+    if (isSymbol(ch))
+    {
+        return true;
+    }
+    if (isdigit(ch) == 1)
+    {
+        return true;
+    }
+    if (ch == '.' || ch == '+' || ch == '-')
+    {
+        return true;
+    }
+    return false;
+}
+
+
+Value* symbolToken(char charRead)
+{
+    char* symbol = (char*)talloc(301);
+    int symSize = 0;
+    Value* symToken = (Value*)talloc(sizeof(Value));
+    symToken->type = SYMBOL_TYPE;
+
+    while (charRead != EOF && charRead != ' ' && charRead != '\n' && charRead != '(' && charRead != ')')
+    {
+        symbol[symSize] = charRead;
+        symSize++;
+        charRead = (char)fgetc(stdin);
+    }
+    ungetc(charRead, stdin);
+    
+    symbol[symSize] = '\0';
+    symToken->s = symbol;
+    return symToken;
+}
 
 // This function should be called when an open quote is found. 
 // It will read characters from stdin until another quote is found.
@@ -18,22 +71,29 @@ char *readString()
 {
     char charRead = (char)fgetc(stdin); // this should be the first character of the string
 
-    char* newString = "\"";
+    char* newString = talloc(301);
+    int size = 0;
+    newString[size] = '"';
+    size++;
     
     while (charRead != EOF && charRead != '\n')
     {
         if (charRead == '"')
         {
-            return strcat(newString, (char)('"'));
+            newString[size] = '"';
+            newString[size+1] = '\0';
+            return newString;
         } else
         {
             // add charRead to newString
-            newString = strcat(newString, charRead);
+            newString[size] = charRead;
+            size++;
         }
         charRead = (char)fgetc(stdin);
     } // if we reach the end of the this while loop before we return, it means we have an error.
-    printf("Syntax error: Closing quotation (\") expected.\n");
+    printf("Syntx error: Closing quotation (\") expected.\n");
     texit(1);
+    return NULL;
 }
 
 
@@ -48,14 +108,14 @@ Value *numToken(char charRead) {
       char symbolsign = charRead;
       charRead = (char)fgetc(stdin);
 
-      if (!isdigit(charRead)) {
+      if (isdigit(charRead) == 0) {
         charRead = ungetc(charRead, stdin);
         charRead = ungetc(symbolsign, stdin); //add back +/- since not number
-        return symbolHelp(charRead);
+        return symbolToken(charRead);
       }
     }
 
-    while (isdigit(charRead) || charRead == '.') { //int or double
+    while (isdigit(charRead) == 1 || charRead == '.') { //int or double
         if (charRead == '.') {
             doubleCheck = 1; //is a double
         }
@@ -83,18 +143,13 @@ Value *numToken(char charRead) {
 Value *boolToken(char readChar) {
   Value *newboolToken = talloc(sizeof(Value));
   newboolToken->type = BOOL_TYPE;
-  int *boolToken = talloc(sizeof(int) * 2);
-  
-  if (readChar == 'f') {
-    boolToken [0] = 0;
-    boolToken [1] = '\0';
-    newboolToken->i = *boolToken;
-  } else if (readChar == 't') {
-    boolToken [0] = 1;
-    boolToken [1] = '\0';
-    newboolToken->i = *boolToken;
+  char boolChar = (char)fgetc(stdin);
+  if (boolChar == 'f') {
+    newboolToken->i = 0;
+  } else if (boolChar == 't') {
+    newboolToken->i = 1;
   } else {
-    printf("Syntax error: untokenizeable \n");
+    printf("Syntx error: found '#', expected 'f' or 't' \n");
     texit(0);
   }
   return newboolToken;
@@ -102,7 +157,14 @@ Value *boolToken(char readChar) {
 
 Value *parenthesisToken(char paren){
     Value* token = (Value*)talloc(sizeof(Value));
-    token->type = STR_TYPE;
+    if (paren == '(')
+    {
+
+        token->type = OPEN_TYPE;
+    } else
+    {
+        token->type = CLOSE_TYPE;
+    }
     char* string = (char*)talloc(sizeof(char) * 2);
     string[0] = paren;
     string[1] = '\0';
@@ -113,7 +175,7 @@ Value *parenthesisToken(char paren){
 
 // looks for comment if readChar is ';'
 int isComment(char readChar) {
-    while (readChar != EOF && readChar != '/n') {
+    while (readChar != EOF && readChar != '\n') {
         readChar = (char)fgetc(stdin); //keep searching for end of comment
     }
     if (readChar == EOF) {
@@ -139,87 +201,32 @@ Value *tokenize() {
             list = cons(parenthesisToken(charRead), list);
         } else if (charRead == '#') {
             list = cons(boolToken(charRead), list);
-        } else if (charRead == '+' || charRead == '-'){
+        } else if (charRead == '+' || charRead == '-' || isdigit(charRead) == 1 || charRead == '.'){
             list = cons(numToken(charRead), list);
         } else if (charRead == '"') {
-            list = cons(readString(), list);
+            Value* strToken = (Value*)talloc(sizeof(Value));
+            strToken->type = STR_TYPE;
+            strToken->s = readString();
+            list = cons(strToken, list);
         } else if (charRead == ';') {
             isComment(charRead);
-        else {
-            printf("Syntax error: untokenizable");
-        break;
+        } else if (charRead == ' ' || charRead == '\n')
+        { 
+            // do nothing
+        } else if (isSymbol(charRead)){
+            list = cons(symbolToken(charRead), list);
+        } else
+        {
+            printf("Syntx error: Untokenizable input\n");
+            texit(1);
         }
         
         charRead = (char)fgetc(stdin);
     }
     Value *revList = reverse(list);
     return revList;
-}}
-
-bool isInitial(char ch){
-    if (65 <= ch && ch <= 90 || 97 <= ch && ch <= 122)
-    {
-        return true;
-    }
-    if (ch == '!' || ch == '$' || ch == '%' || ch == '&' || ch == '*' || ch == '/' || ch == ':' || ch == '<'
-        || ch == '=' || ch == '>' || ch == '?' || ch == '~' || ch == '_' || ch == '^')
-    {
-        return true;
-    }
-    return false;
 }
 
-bool isSubsequent(char ch)
-{
-    if (isInitial(ch))
-    {
-        return true;
-    }
-    if (isdigit(ch))
-    {
-        return true;
-    }
-    if (ch == '.' || ch == '+' || ch == '-')
-    {
-        return true;
-    }
-    return false;
-}
-
-
-Value* symbolToken(char charRead)
-{
-    char* symbol = (char*)talloc(301);
-    int symSize = 0;
-    Value* symToken = (Value*)talloc(sizeof(Value));
-    symToken->type = SYMBOL_TYPE;
-
-    if (isInitial(charRead))
-    {
-        symbol[0] = charRead;
-        symSize++;
-        charRead = (char)fgetc(stdin);
-        while (charRead != EOF && charRead != ' ' && charRead != '\n' && charRead != '(' && charRead != ')')
-        {
-            symbol[symSize] = charRead;
-            symSize++;
-            charRead = (char)fgetc(stdin);
-        }
-        ungetc(charRead, stdin);
-    } else
-    if (charRead == '+' || charRead == '-')
-    {
-        symbol[0] = charRead;
-        symSize++; // want to return
-        
-    } else
-    {
-        printf("Syntax error: Untokenizable input: %c\n", charRead);
-        texit(1);
-    }
-    symToken->s = symbol;
-    return symToken;
-}
 
 
 
@@ -227,34 +234,38 @@ Value* symbolToken(char charRead)
 // Displays the contents of the linked list as tokens, with type information
 void displayTokens(Value *list){
     //token = car(list);
-    while(cdr(list)->type != NULL_TYPE){
+    
+    while(!isNull(list) && !isNull(car(list))){
         if (car(list)->type == INT_TYPE){
-            printf("%i : integer \n", car(list));
+            printf("%i:integer\n", car(list)->i);
         }
         if (car(list)->type == BOOL_TYPE){
-            if (boolToken(car(list))){
-                printf("#t: boolean \n");
+            if (car(list)->i == 1){
+                printf("#t:boolean\n");
             }
             else{
-                printf("#f: boolean \n");
+                printf("#f:boolean\n");
             }
         }
         if (car(list)->type == STR_TYPE){
-            printf("%s : string \n", car(list));
+            printf("%s:string\n", car(list)->s);
         }
         if (car(list)->type == DOUBLE_TYPE){
-            printf("%d : double \n", car(list));
+            printf("%lf:double\n", car(list)->d);
         }
         if (car(list)->type == SYMBOL_TYPE){
-            printf("%% : symbol \n", car(list));
+            printf("%s:symbol\n", car(list)->s);
         }
         if (car(list)->type == OPEN_TYPE){
-            printf("( : open \n");
+            printf("(:open\n");
         }
         if (car(list)->type == CLOSE_TYPE){
-            printf(") : close \n");
+            printf("):close\n");
+        } else 
+        {
+            
         }
-        displayTokens(cdr(list));
+        list = cdr(list);
     }
     texit(0);
 }
